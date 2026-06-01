@@ -1,0 +1,50 @@
+package routes
+
+import (
+	"net/http"
+
+	"example.com/rest-api/models"
+	"github.com/gin-gonic/gin"
+)
+
+func signup(context *gin.Context) {
+	var user models.User
+
+	err := context.ShouldBindJSON(&user)
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"ERROR_signup": err.Error()})
+		return
+	}
+
+	err = user.Save()
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"ERROR_signup": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusCreated, gin.H{"message": "User created successfully"})
+
+}
+
+func login(context *gin.Context) {
+	var user models.User
+
+	err := context.ShouldBindJSON(&user)
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"ERROR_login": err.Error()})
+		return
+	}
+
+	err = user.ValidateCredentials()
+
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"ERROR_login": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"message": "loin successfully"})
+
+}
