@@ -1,10 +1,8 @@
 package main
 
 import (
-	"net/http"
-
 	"example.com/rest-api/db"
-	"example.com/rest-api/models"
+	"example.com/rest-api/routes"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,41 +10,8 @@ func main() {
 	db.InitDB()
 
 	server := gin.Default()
-	server.GET("/events", getEvents)
-	server.POST("/events", createEvents)
+
+	routes.RegisterRoutes(server)
 
 	server.Run(":8080")
-}
-
-func getEvents(context *gin.Context) {
-	events, err := models.GetAll()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"ERROR1": err.Error()})
-		return
-
-	}
-	context.JSON(http.StatusOK, events)
-}
-
-func createEvents(context *gin.Context) {
-	var newEvent models.Event
-	err := context.ShouldBindJSON(&newEvent)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"ERROR": err.Error()})
-		return
-	}
-
-	newEvent.ID = 1
-	newEvent.UserID = 1
-
-	err = newEvent.Save()
-
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"ERROR2": err.Error()})
-		return
-
-	}
-
-	context.JSON(http.StatusCreated, gin.H{"message": "event created successfully", "event": newEvent})
-
 }
